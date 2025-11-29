@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mindx-api
+  labels:
+    app: mindx-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mindx-api
+  template:
+    metadata:
+      labels:
+        app: mindx-api
+    spec:
+      containers:
+      - name: mindx-api
+        image: mindxacrnamvc.azurecr.io/mindx-api:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: acr-secret
