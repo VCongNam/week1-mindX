@@ -4,17 +4,23 @@ metadata:
   name: mindx-api-ingress
   namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /
+      - path: /api
         pathType: Prefix
         backend:
           service:
             name: mindx-api-service
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mindx-webapp-service
             port:
               number: 80
