@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Layout, Menu, Button, Card, Statistic, Row, Col, Typography, Space, Avatar, Dropdown } from 'antd'
+import { Layout, Menu, Button, Card, Statistic, Row, Col, Typography, Space, Avatar, Dropdown, message } from 'antd'
 import { 
   HomeOutlined, 
   ApiOutlined, 
@@ -8,8 +8,11 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   HeartOutlined,
-  RocketOutlined
+  RocketOutlined,
+  LockOutlined
 } from '@ant-design/icons'
+import { useAuth } from './contexts/AuthContext'
+import axios from 'axios'
 import './App.css'
 
 const { Header, Content, Footer } = Layout
@@ -18,21 +21,21 @@ const { Title, Text, Paragraph } = Typography
 function App() {
   const [apiData, setApiData] = useState(null)
   const [healthData, setHealthData] = useState(null)
+  const [protectedData, setProtectedData] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
-
+  
+  const { user, isAuthenticated, login, logout } = useAuth()
   const API_URL = import.meta.env.VITE_API_URL || '/api'
 
   // Fetch API data
   const fetchApiHello = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${API_URL}/hello`)
-      const data = await response.json()
-      setApiData(data)
+      const response = await axios.get(`${API_URL}/hello`)
+      setApiData(response.data)
     } catch (err) {
       console.error('Error fetching API:', err)
+      message.error('Failed to fetch API data')
     } finally {
       setLoading(false)
     }
@@ -42,11 +45,31 @@ function App() {
   const fetchHealth = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${API_URL}/health`)
-      const data = await response.json()
-      setHealthData(data)
+      const response = await axios.get(`${API_URL}/health`)
+      setHealthData(response.data)
     } catch (err) {
       console.error('Error fetching health:', err)
+      message.error('Failed to fetch health data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch protected data (requires authentication)
+  const fetchProtectedData = async () => {
+    if (!isAuthenticated) {
+      message.warning('Please login to access protected data')
+      return
+    }
+    
+    setLoading(true)
+    try {
+      const response = await axios.get(`${API_URL}/protected`)
+      setProtectedData(response.data)
+      message.success('Protected data fetched successfully!')
+    } catch (err) {
+      console.error('Error fetching protected data:', err)
+      message.error('Failed to fetch protected data')
     } finally {
       setLoading(false)
     }
@@ -58,17 +81,20 @@ function App() {
     fetchApiHello()
   }, [])
 
-  // Mock login (sẽ thay bằng OpenID sau)
-  const handleLogin = () => {
-    // TODO: Implement OpenID login
-    setIsAuthenticated(true)
-    setUser({ name: 'User Demo', email: 'user@mindx.edu.vn' })
+  // Handle login
+  const handleLogin = async () => {
+    try {
+      await login()
+    } catch (err) {
+      message.error('Login failed')
+    }
   }
 
-  // Mock logout
+  // Handle logout
   const handleLogout = () => {
-    setIsAuthenticated(false)
-    setUser(null)
+    logout()
+    setProtectedData(null)
+    message.success('Logged out successfully')
   }
 
   // User menu items
@@ -76,12 +102,8 @@ function App() {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Profile',
-    },
-    {
-      key: 'dashboard',
-      icon: <DashboardOutlined />,
-      label: 'Dashboard',
+      label: `${user?.email || 'Profile'}`,
+      disabled: true,
     },
     {
       type: 'divider',
@@ -297,6 +319,79 @@ function App() {
                 )}
               </Card>
             </Col>
+
+            {/* Protected API */}
+            <Col xs={24} lg={12}>
+              <Card 
+                title={
+                  <Space>
+                    <LockOutlined style={{ color: '#faad14' }} />
+                    <span>Protected API (Auth Required)</span>
+                  </Space>
+                }
+                extra={
+                  <Button 
+                    type="primary" 
+                    size="small"
+                    loading={loading}
+                    onClick={fetchProtectedData}
+                    disabled={!isAuthenticated}
+                  >
+                    Call Protected API
+                  </Button>
+                }
+              >
+                {!isAuthenticated ? (
+                  <Text type="warning">Please login to access this endpoint</Text>
+                ) : protectedData ? (
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div>
+                      <Text strong>Message: </Text>
+                      <Text>{protectedData.message}</Text>
+                    </div>
+                    <div>
+                      <Text strong>User ID: </Text>
+                      <Text>{protectedData.user?.sub}</Text>
+                    </div>
+                    <div>
+                      <Text strong>Email: </Text>
+                      <Text>{protectedData.user?.email}</Text>
+                    </div>
+                  </Space>
+                ) : (
+                  <Text type="secondary">Click button to fetch protected data</Text>
+                )}
+              </Card>
+            </Col>
+
+            {/* User Info */}
+            {isAuthenticated && user && (
+              <Col xs={24} lg={12}>
+                <Card 
+                  title={
+                    <Space>
+                      <UserOutlined style={{ color: '#52c41a' }} />
+                      <span>User Information</span>
+                    </Space>
+                  }
+                >
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div>
+                      <Text strong>Name: </Text>
+                      <Text>{user.name}</Text>
+                    </div>
+                    <div>
+                      <Text strong>Email: </Text>
+                      <Text>{user.email}</Text>
+                    </div>
+                    <div>
+                      <Text strong>User ID: </Text>
+                      <Text code>{user.id}</Text>
+                    </div>
+                  </Space>
+                </Card>
+              </Col>
+            )}
 
             {/* System Info */}
             <Col xs={24}>
