@@ -7,7 +7,7 @@ Set up an JS/TS Fullstack App on Azure Cloud
 - HTTPS domain setup
 - Registration and Authentication
   - [Standard] Registration and Login, or
-  - [More challengging] *Authentication via OpenID (using https://id-dev.mindx.edu.vn
+  - [More challengging] *Authentication via OpenID (using https://id-dev.mindx.edu.vn)
 
 ## Acceptance criterias
 - [ ] The back-end API is deployed and accessible via a public HTTPS endpoint.
