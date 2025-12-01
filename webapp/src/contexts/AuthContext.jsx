@@ -1,95 +1,95 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useState, useEffect } from 'react'
+import { jwtDecode } from 'jwt-decode'
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null)
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext)
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider')
   }
-  return context;
-};
+  return context
+}
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null)
+  const [token, setToken] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-  // Setup axios interceptor to add token to requests
+  // Check for existing token on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else {
-      setLoading(false);
+    const storedToken = localStorage.getItem('access_token')
+    const storedUser = localStorage.getItem('user')
+    
+    if (storedToken && storedUser) {
+      try {
+        const decoded = jwtDecode(storedToken)
+        // Check if token is expired
+        if (decoded.exp * 1000 > Date.now()) {
+          setToken(storedToken)
+          setUser(JSON.parse(storedUser))
+        } else {
+          // Token expired, clear storage
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('user')
+        }
+      } catch (error) {
+        console.error('Invalid token:', error)
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('user')
+      }
     }
-  }, []);
+    setLoading(false)
+  }, [])
 
-  // Fetch current user
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/auth/me`);
-      setUser(response.data.user);
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
+  const login = () => {
+    const clientId = import.meta.env.VITE_OIDC_CLIENT_ID
+    const redirectUri = import.meta.env.VITE_OIDC_REDIRECT_URI
+    const issuer = import.meta.env.VITE_OIDC_ISSUER
+    const scope = import.meta.env.VITE_OIDC_SCOPE || 'openid profile email'
 
-  // Login - redirect to authorization URL
-  const login = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/auth/login`);
-      const { authUrl } = response.data;
-      window.location.href = authUrl;
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
+    // Build authorization URL
+    const authUrl = `${issuer}/auth?` + new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: scope,
+      state: Math.random().toString(36).substring(7) // Random state for security
+    })
 
-  // Handle callback - exchange code for token
-  const handleCallback = async (code) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/callback`, { code });
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setUser(user);
-      setIsAuthenticated(true);
-      
-      return true;
-    } catch (error) {
-      console.error('Callback failed:', error);
-      throw error;
-    }
-  };
+    // Redirect to OpenID provider
+    window.location.href = authUrl
+  }
 
-  // Logout
   const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+    setUser(null)
+    setToken(null)
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user')
+    
+    // Optional: Redirect to OpenID provider logout
+    // const issuer = import.meta.env.VITE_OIDC_ISSUER
+    // window.location.href = `${issuer}/logout`
+  }
+
+  const setAuthData = (accessToken, userData) => {
+    setToken(accessToken)
+    setUser(userData)
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('user', JSON.stringify(userData))
+  }
+
+  const isAuthenticated = !!user && !!token
 
   const value = {
     user,
+    token,
     loading,
     isAuthenticated,
     login,
     logout,
-    handleCallback
-  };
+    setAuthData
+  }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

@@ -9,12 +9,18 @@ const PORT = process.env.PORT || 5000;
 
 // Environment variables
 const {
-  CLIENT_ID,
-  CLIENT_SECRET,
-  OPENID_PROVIDER,
+  OIDC_CLIENT_ID,
+  OIDC_CLIENT_SECRET,
+  OIDC_ISSUER,
   JWT_SECRET,
-  REDIRECT_URI
+  OIDC_REDIRECT_URI
 } = process.env;
+
+// Fallback to old env var names for compatibility
+const CLIENT_ID = OIDC_CLIENT_ID || process.env.CLIENT_ID;
+const CLIENT_SECRET = OIDC_CLIENT_SECRET || process.env.CLIENT_SECRET;
+const OPENID_PROVIDER = OIDC_ISSUER || process.env.OPENID_PROVIDER;
+const REDIRECT_URI = OIDC_REDIRECT_URI || process.env.REDIRECT_URI;
 
 // Middleware
 app.use(cors({
@@ -149,9 +155,10 @@ app.post('/api/auth/callback', async (req, res) => {
     );
 
     res.json({
-      token: jwtToken,
+      access_token: jwtToken,
+      token_type: 'Bearer',
       user: {
-        id: userInfo.sub,
+        sub: userInfo.sub,
         email: userInfo.email,
         name: userInfo.name
       }
