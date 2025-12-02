@@ -5,7 +5,7 @@ metadata:
   labels:
     app: mindx-api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: mindx-api
@@ -14,29 +14,39 @@ spec:
       labels:
         app: mindx-api
     spec:
+      imagePullSecrets:
+      - name: acr-secret
       containers:
       - name: mindx-api
         image: mindxacrnamvc.azurecr.io/mindx-api:latest
         ports:
         - containerPort: 3000
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-      imagePullSecrets:
-      - name: acr-secret
+        env:
+        - name: PORT
+          value: "3000"
+        - name: OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oidc-secret
+              key: client-id
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oidc-secret
+              key: client-secret
+        - name: OIDC_ISSUER
+          valueFrom:
+            secretKeyRef:
+              name: oidc-secret
+              key: issuer
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oidc-secret
+              key: jwt-secret
+        - name: OIDC_REDIRECT_URI
+          value: "https://namvc.4.190.61.4.nip.io/callback"
+        - name: OIDC_REDIRECT_URI_FALLBACK
+          value: "http://4.190.61.4/callback"
+        - name: CORS_ORIGIN
+          value: "https://namvc.4.190.61.4.nip.io,http://4.190.61.4"

@@ -4,11 +4,17 @@ metadata:
   name: mindx-api-ingress
   namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - namvc.4.190.61.4.nip.io
+    secretName: mindx-tls-cert
   rules:
-  - http:
+  - host: namvc.4.190.61.4.nip.io
+    http:
       paths:
       - path: /api
         pathType: Prefix

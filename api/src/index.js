@@ -23,8 +23,19 @@ const OPENID_PROVIDER = OIDC_ISSUER || process.env.OPENID_PROVIDER;
 const REDIRECT_URI = OIDC_REDIRECT_URI || process.env.REDIRECT_URI;
 
 // Middleware
+// Parse CORS_ORIGIN - support comma-separated multiple origins
+const corsOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : ['http://4.190.61.4'];
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  ...corsOrigins
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
@@ -76,16 +87,29 @@ app.get('/api/hello', (req, res) => {
 // ============ AUTHENTICATION ENDPOINTS ============
 
 // 1. Login endpoint - Generate authorization URL
-app.get('/api/auth/login', (req, res) => {
-  const state = Math.random().toString(36).substring(7);
-  const authUrl = `${OPENID_PROVIDER}/oauth2/authorize?` +
-    `client_id=${CLIENT_ID}&` +
-    `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
-    `response_type=code&` +
-    `scope=openid profile email&` +
-    `state=${state}`;
+app.get('/api/auth/login', async (req, res) => {
+  try {
+    // Discover OIDC endpoints
+    const discoveryResponse = await axios.get(`${OPENID_PROVIDER}/.well-known/openid-configuration`);
+    const { authorization_endpoint } = discoveryResponse.data;
 
-  res.json({ authUrl, state });
+    // Dynamic redirect URI based on request origin
+    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || REDIRECT_URI.replace('/callback', '');
+    const dynamicRedirectUri = `${origin}/callback`;
+
+    const state = Math.random().toString(36).substring(7);
+    const authUrl = `${authorization_endpoint}?` +
+      `client_id=${CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(dynamicRedirectUri)}&` +
+      `response_type=code&` +
+      `scope=openid profile email&` +
+      `state=${state}`;
+
+    res.json({ authUrl, state });
+  } catch (error) {
+    console.error('OIDC discovery error:', error.message);
+    res.status(500).json({ error: 'Failed to get authorization URL' });
+  }
 });
 
 // 2. Callback endpoint - Exchange code for token
@@ -97,9 +121,13 @@ app.post('/api/auth/callback', async (req, res) => {
   }
 
   try {
+    // Discover OIDC endpoints
+    const discoveryResponse = await axios.get(`${OPENID_PROVIDER}/.well-known/openid-configuration`);
+    const { token_endpoint, userinfo_endpoint } = discoveryResponse.data;
+
     // Exchange authorization code for tokens
     const tokenResponse = await axios.post(
-      `${OPENID_PROVIDER}/oauth2/token`,
+      token_endpoint,
       new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
@@ -125,7 +153,7 @@ app.post('/api/auth/callback', async (req, res) => {
     let userInfo;
     try {
       const userInfoResponse = await axios.get(
-        `${OPENID_PROVIDER}/oauth2/userInfo`,
+        userinfo_endpoint,
         {
           headers: {
             Authorization: `Bearer ${access_token}`
