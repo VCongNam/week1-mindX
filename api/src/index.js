@@ -212,8 +212,25 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
 });
 
 // 4. Logout endpoint
-app.post('/api/auth/logout', (req, res) => {
-  res.json({ message: 'Logged out successfully' });
+app.post('/api/auth/logout', async (req, res) => {
+  try {
+    // Discover OIDC endpoints
+    const discoveryResponse = await axios.get(`${OPENID_PROVIDER}/.well-known/openid-configuration`);
+    const { end_session_endpoint } = discoveryResponse.data;
+
+    // Return logout URL for client-side redirect
+    const logoutUrl = end_session_endpoint 
+      ? `${end_session_endpoint}?post_logout_redirect_uri=${encodeURIComponent(REDIRECT_URI.replace('/callback', ''))}`
+      : null;
+
+    res.json({ 
+      message: 'Logged out successfully',
+      logoutUrl 
+    });
+  } catch (error) {
+    console.error('Logout error:', error.message);
+    res.json({ message: 'Logged out successfully' });
+  }
 });
 
 // Protected example endpoint
