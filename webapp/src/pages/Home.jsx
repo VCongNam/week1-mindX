@@ -84,14 +84,14 @@ function Home() {
   ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', height: '100%' }}>
       {/* Header */}
       <Header style={{ 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
         background: '#001529',
-        padding: '0 50px'
+        padding: '0 24px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <RocketOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '16px' }} />
@@ -140,8 +140,8 @@ function Home() {
       </Header>
 
       {/* Content */}
-      <Content style={{ padding: '50px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <Content style={{ padding: '24px', overflow: 'auto' }}>
+        <div style={{ maxWidth: '100%', margin: '0 auto' }}>
           {/* Hero Section */}
           <Card 
             style={{ 

@@ -43,10 +43,20 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = () => {
+    // Clear any existing auth data before login
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user')
+    setUser(null)
+    setToken(null)
+
     const clientId = import.meta.env.VITE_OIDC_CLIENT_ID
     const redirectUri = import.meta.env.VITE_OIDC_REDIRECT_URI
     const issuer = import.meta.env.VITE_OIDC_ISSUER
     const scope = import.meta.env.VITE_OIDC_SCOPE || 'openid profile email'
+
+    // Generate and store state for CSRF protection
+    const state = Math.random().toString(36).substring(7)
+    sessionStorage.setItem('oauth_state', state)
 
     // Build authorization URL
     const authUrl = `${issuer}/auth?` + new URLSearchParams({
@@ -54,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: scope,
-      state: Math.random().toString(36).substring(7) // Random state for security
+      state: state
     })
 
     // Redirect to OpenID provider

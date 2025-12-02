@@ -14,6 +14,7 @@ const Callback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get('code')
+      const state = searchParams.get('state')
       const error = searchParams.get('error')
 
       if (error) {
@@ -28,6 +29,17 @@ const Callback = () => {
         return
       }
 
+      // Validate state parameter
+      const storedState = sessionStorage.getItem('oauth_state')
+      if (state && storedState && state !== storedState) {
+        setError('Invalid state parameter - possible CSRF attack')
+        setLoading(false)
+        return
+      }
+
+      // Clear state after validation
+      sessionStorage.removeItem('oauth_state')
+
       try {
         // Exchange code for tokens via backend
         const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -40,7 +52,8 @@ const Callback = () => {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to exchange authorization code')
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to exchange authorization code')
         }
 
         const data = await response.json()
