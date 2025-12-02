@@ -93,14 +93,13 @@ app.get('/api/auth/login', async (req, res) => {
     const discoveryResponse = await axios.get(`${OPENID_PROVIDER}/.well-known/openid-configuration`);
     const { authorization_endpoint } = discoveryResponse.data;
 
-    // Dynamic redirect URI based on request origin
-    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || REDIRECT_URI.replace('/callback', '');
-    const dynamicRedirectUri = `${origin}/callback`;
+    // Use configured redirect URI (from env var)
+    const redirectUri = REDIRECT_URI;
 
     const state = Math.random().toString(36).substring(7);
     const authUrl = `${authorization_endpoint}?` +
       `client_id=${CLIENT_ID}&` +
-      `redirect_uri=${encodeURIComponent(dynamicRedirectUri)}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=openid profile email&` +
       `state=${state}`;
