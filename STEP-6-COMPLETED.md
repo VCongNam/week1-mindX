@@ -2,7 +2,7 @@
 
 **Date Completed:** December 2, 2025  
 **Student:** NamVC  
-**Mentor:** HuyNQ
+
 
 ## Overview
 Successfully configured custom domain with HTTPS/SSL certificate for the full-stack application using cert-manager and Let's Encrypt. The application is now accessible via secure HTTPS connection with automatic certificate management.

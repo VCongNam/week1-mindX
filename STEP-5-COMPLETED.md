@@ -1,7 +1,7 @@
 # ✅ BƯỚC 5 ĐÃ HOÀN THÀNH - OpenID Authentication
 
 **Ngày hoàn thành**: 01/12/2024  
-**Người thực hiện**: [Tên bạn]  
+**Người thực hiện**: NamVC
 **Thời gian**: Week 1 - MindX Engineer Onboarding
 
 ---
