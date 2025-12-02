@@ -45,8 +45,6 @@ spec:
               name: oidc-secret
               key: jwt-secret
         - name: OIDC_REDIRECT_URI
-          value: "https://namvc.4.190.61.4.nip.io/callback"
-        - name: OIDC_REDIRECT_URI_FALLBACK
           value: "http://4.190.61.4/callback"
         - name: CORS_ORIGIN
           value: "https://namvc.4.190.61.4.nip.io,http://4.190.61.4"
