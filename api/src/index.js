@@ -1,3 +1,6 @@
+const { setupAppInsights, trackEvent, trackException } = require('./config/appInsights');
+setupAppInsights();
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
