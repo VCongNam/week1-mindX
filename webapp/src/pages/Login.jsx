@@ -3,6 +3,7 @@ import { LoginOutlined, RocketOutlined } from '@ant-design/icons'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { logEvent } from '../config/analytics'
 
 const { Title, Paragraph } = Typography
 
@@ -15,6 +16,11 @@ const Login = () => {
       navigate('/', { replace: true })
     }
   }, [isAuthenticated, navigate])
+
+  const handleLogin = () => {
+    logEvent('User', 'Click', 'Login Button');
+    login();
+  };
 
   return (
     <div style={{
@@ -48,7 +54,7 @@ const Login = () => {
             type="primary" 
             size="large"
             icon={<LoginOutlined />}
-            onClick={login}
+            onClick={handleLogin}
             block
             style={{ height: '48px', fontSize: '16px' }}
           >

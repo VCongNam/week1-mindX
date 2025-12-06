@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
+import { logEvent, setUserId } from '../config/analytics'
 
 const AuthContext = createContext(null)
 
@@ -72,6 +73,11 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
+    // Track logout event
+    if (user) {
+      logEvent('Authentication', 'Logout', user.email);
+    }
+    
     setUser(null)
     setToken(null)
     localStorage.removeItem('access_token')
@@ -87,6 +93,10 @@ export const AuthProvider = ({ children }) => {
     setUser(userData)
     localStorage.setItem('access_token', accessToken)
     localStorage.setItem('user', JSON.stringify(userData))
+    
+    // Track successful login
+    logEvent('Authentication', 'Login Success', userData.email);
+    setUserId(userData.id || userData.sub);
   }
 
   const isAuthenticated = !!user && !!token

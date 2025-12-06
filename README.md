@@ -1,6 +1,6 @@
-# MindX Onboarding - Week 1 Project
+# MindX Onboarding - Weeks 1 & 2
 
-Full-stack application deployed on Azure Kubernetes Service with OpenID Connect authentication and HTTPS.
+Full-stack application deployed on Azure Kubernetes Service with OpenID Connect authentication, HTTPS, and comprehensive monitoring.
 
 ## 🚀 Live Application
 
@@ -12,12 +12,14 @@ Full-stack application deployed on Azure Kubernetes Service with OpenID Connect 
 This project demonstrates a complete DevOps workflow for deploying a full-stack application to Azure Cloud:
 
 - **Backend API:** Node.js/Express with OpenID Connect authentication
-- **Frontend:** React + TypeScript SPA
+- **Frontend:** React + Vite SPA with Ant Design
 - **Infrastructure:** Azure Kubernetes Service (AKS)
 - **Container Registry:** Azure Container Registry (ACR)
 - **Ingress:** NGINX Ingress Controller with path-based routing
 - **SSL/TLS:** Let's Encrypt certificates via cert-manager
 - **Authentication:** OpenID Connect integration with MindX ID
+- **Monitoring:** Azure Application Insights for backend metrics
+- **Analytics:** Google Analytics 4 for user behavior tracking
 
 ## 🏗️ Architecture
 
@@ -246,6 +248,7 @@ Webapp ← API (JWT token + user info)
 **Webapp (.env.production):**
 ```env
 VITE_API_URL=/api
+VITE_GA_MEASUREMENT_ID=G-ZNBDKG2FPQ
 VITE_OIDC_ISSUER=https://id-dev.mindx.edu.vn
 VITE_OIDC_CLIENT_ID=mindx-onboarding
 VITE_OIDC_REDIRECT_URI=http://4.190.61.4/callback
@@ -528,3 +531,100 @@ MindX Engineer Onboarding Program - Week 1
 ## 📄 License
 
 This project is part of the MindX Onboarding Program.
+
+
+---
+
+## 📊 Week 2: Monitoring & Analytics
+
+### Production Metrics (Azure Application Insights)
+
+**Resource:** `mindx-api-insights`  
+**Dashboard:** [Azure Portal](https://portal.azure.com)
+
+**Features:**
+- ✅ Real-time API monitoring
+- ✅ Error tracking and logging
+- ✅ Performance metrics (response time, throughput)
+- ✅ Custom event tracking (20+ events)
+- ✅ Automated alerts (3 critical alerts)
+- ✅ Dependency tracking
+
+**Key Metrics:**
+- Request rate and response times
+- Failed requests and exceptions
+- Authentication success/failure rates
+- User activity patterns
+
+**Alerts Configured:**
+1. High Error Rate (>5 errors/5min)
+2. Slow Response Time (>2s average)
+3. High Exception Rate (>3 exceptions/5min)
+
+### Product Metrics (Google Analytics 4)
+
+**Property:** `MindX Onboarding App`  
+**Dashboard:** [Google Analytics](https://analytics.google.com)  
+**Measurement ID:** `G-ZNBDKG2FPQ`
+
+**Features:**
+- ✅ Page view tracking (all routes)
+- ✅ User session analytics
+- ✅ Custom event tracking
+- ✅ User journey analysis
+- ✅ Real-time monitoring
+
+**Tracked Events:**
+- Page views (Home, Login, Dashboard)
+- Login button clicks
+- Authentication success/failure
+- User logout
+- Custom test events
+
+**Test Page:** http://localhost:5173/ga-test
+
+### Monitoring Documentation
+
+- [Complete Metrics Setup Guide](doc/week-2/METRICS_SETUP.md)
+- [Tracking Events Reference](doc/week-2/TRACKING_EVENTS.md)
+- [Deployment Steps](doc/week-2/DEPLOYMENT_STEPS.md)
+- [GA Test Guide](doc/week-2/GA_TEST_GUIDE.md)
+- [Progress Tracker](doc/week-2/PROGRESS.md)
+
+---
+
+## 🎯 Completed Milestones
+
+### Week 1: Infrastructure & Authentication ✅
+- [x] Azure Container Registry setup
+- [x] AKS cluster deployment
+- [x] NGINX Ingress Controller
+- [x] React webapp deployment
+- [x] OpenID Connect authentication
+- [x] HTTPS with Let's Encrypt
+
+### Week 2: Monitoring & Analytics ✅
+- [x] Azure Application Insights integration
+- [x] Custom event tracking (20+ events)
+- [x] Automated alerts (3 alerts)
+- [x] Google Analytics 4 integration
+- [x] GA test page with 6 test scenarios
+- [x] Comprehensive documentation
+
+---
+
+## 📈 Monitoring Access
+
+### Azure Application Insights
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Search for "Application Insights"
+3. Select: `mindx-api-insights`
+4. View: Live Metrics, Failures, Performance, Logs
+
+### Google Analytics
+1. Go to [Google Analytics](https://analytics.google.com)
+2. Select property: `MindX Onboarding App`
+3. View: Realtime, Engagement, Events
+4. Debug: Admin → DebugView
+
+---
