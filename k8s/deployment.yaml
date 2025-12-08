@@ -48,3 +48,10 @@ spec:
           value: "http://4.190.61.4/callback"
         - name: CORS_ORIGIN
           value: "https://namvc.4.190.61.4.nip.io,http://4.190.61.4"
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: appinsights-secret
+              key: connection-string
+        - name: NODE_ENV
+          value: "production"

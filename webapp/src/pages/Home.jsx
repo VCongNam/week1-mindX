@@ -116,6 +116,12 @@ function Home() {
                 icon: <ApiOutlined />,
                 label: 'API',
               },
+              {
+                key: 'ga-test',
+                icon: <RocketOutlined />,
+                label: 'GA Test',
+                onClick: () => navigate('/ga-test'),
+              },
             ]}
             style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none' }}
           />
