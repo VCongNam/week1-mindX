@@ -248,7 +248,6 @@ Webapp ← API (JWT token + user info)
 **Webapp (.env.production):**
 ```env
 VITE_API_URL=/api
-VITE_GA_MEASUREMENT_ID=G-ZNBDKG2FPQ
 VITE_OIDC_ISSUER=https://id-dev.mindx.edu.vn
 VITE_OIDC_CLIENT_ID=mindx-onboarding
 VITE_OIDC_REDIRECT_URI=http://4.190.61.4/callback
@@ -565,7 +564,6 @@ This project is part of the MindX Onboarding Program.
 
 **Property:** `MindX Onboarding App`  
 **Dashboard:** [Google Analytics](https://analytics.google.com)  
-**Measurement ID:** `G-ZNBDKG2FPQ`
 
 **Features:**
 - ✅ Page view tracking (all routes)
